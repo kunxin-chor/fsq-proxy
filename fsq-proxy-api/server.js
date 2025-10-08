@@ -58,19 +58,18 @@ app.get('/', (req, res) => {
     message: 'Foursquare Places API Proxy',
     version: '1.0.0',
     endpoints: {
-      search: '/api/places/search',
-      nearby: '/api/places/nearby',
-      details: '/api/places/:fsq_id',
-      photos: '/api/places/:fsq_id/photos',
-      tips: '/api/places/:fsq_id/tips',
-      autocomplete: '/api/autocomplete'
+      search: '/places/search',
+      details: '/places/:fsq_place_id',
+      photos: '/places/:fsq_place_id/photos',
+      tips: '/places/:fsq_place_id/tips',
+      autocomplete: '/autocomplete'
     },
     documentation: 'See README.md for detailed API documentation'
   });
 });
 
 // Place Search - Search for places using various parameters
-app.get('/api/places/search', async (req, res, next) => {
+app.get('/places/search', async (req, res, next) => {
   try {
     const response = await fsqClient.get('/search', { params: req.query });
     res.json(response.data);
@@ -84,43 +83,12 @@ app.get('/api/places/search', async (req, res, next) => {
   }
 });
 
-// Nearby Search - Get places near a location
-app.get('/api/places/nearby', async (req, res, next) => {
-  try {
-    const { ll, limit = 50, radius, categories, fields } = req.query;
-    
-    if (!ll) {
-      return res.status(400).json({ error: 'll (latitude,longitude) parameter is required' });
-    }
-
-    const params = { ll };
-    if (limit) params.limit = parseInt(limit);
-    if (radius) params.radius = parseInt(radius);
-    if (categories) params.categories = categories;
-    if (fields) params.fields = fields;
-
-    const response = await fsqClient.get('/nearby', { params });
-    res.json(response.data);
-  } catch (error) {
-    if (error.response) {
-      return res.status(error.response.status).json({
-        error: error.response.data
-      });
-    }
-    next(error);
-  }
-});
 
 // Get Place Details
-app.get('/api/places/:fsq_id', async (req, res, next) => {
+app.get('/places/:fsq_place_id', async (req, res, next) => {
   try {
-    const { fsq_id } = req.params;
-    const { fields } = req.query;
-
-    const params = {};
-    if (fields) params.fields = fields;
-
-    const response = await fsqClient.get(`/${fsq_id}`, { params });
+    const { fsq_place_id } = req.params;
+    const response = await fsqClient.get(`/${fsq_place_id}`, { params: req.query });
     res.json(response.data);
   } catch (error) {
     if (error.response) {
@@ -133,15 +101,10 @@ app.get('/api/places/:fsq_id', async (req, res, next) => {
 });
 
 // Get Place Photos
-app.get('/api/places/:fsq_id/photos', async (req, res, next) => {
+app.get('/places/:fsq_place_id/photos', async (req, res, next) => {
   try {
-    const { fsq_id } = req.params;
-    const { limit = 5, classifications } = req.query;
-
-    const params = { limit: parseInt(limit) };
-    if (classifications) params.classifications = classifications;
-
-    const response = await fsqClient.get(`/${fsq_id}/photos`, { params });
+    const { fsq_place_id } = req.params;
+    const response = await fsqClient.get(`/${fsq_place_id}/photos`, { params: req.query });
     res.json(response.data);
   } catch (error) {
     if (error.response) {
@@ -154,17 +117,10 @@ app.get('/api/places/:fsq_id/photos', async (req, res, next) => {
 });
 
 // Get Place Tips
-app.get('/api/places/:fsq_id/tips', async (req, res, next) => {
+app.get('/places/:fsq_place_id/tips', async (req, res, next) => {
   try {
-    const { fsq_id } = req.params;
-    const { limit = 5, sort = 'POPULAR' } = req.query;
-
-    const params = { 
-      limit: parseInt(limit),
-      sort 
-    };
-
-    const response = await fsqClient.get(`/${fsq_id}/tips`, { params });
+    const { fsq_place_id } = req.params;
+    const response = await fsqClient.get(`/${fsq_place_id}/tips`, { params: req.query });
     res.json(response.data);
   } catch (error) {
     if (error.response) {
@@ -177,21 +133,17 @@ app.get('/api/places/:fsq_id/tips', async (req, res, next) => {
 });
 
 // Autocomplete - Get autocomplete suggestions
-app.get('/api/autocomplete', async (req, res, next) => {
+app.get('/autocomplete', async (req, res, next) => {
   try {
-    const { query, ll, radius, limit = 10, types } = req.query;
-    
-    if (!query) {
-      return res.status(400).json({ error: 'query parameter is required' });
-    }
-
-    const params = { query };
-    if (ll) params.ll = ll;
-    if (radius) params.radius = parseInt(radius);
-    if (limit) params.limit = parseInt(limit);
-    if (types) params.types = types;
-
-    const response = await fsqClient.get('/autocomplete', { params });
+    const fsqAutocompleteClient = axios.create({
+      baseURL: 'https://places-api.foursquare.com',
+      headers: {
+        'Authorization': `Bearer ${FSQ_API_KEY}`,
+        'Accept': 'application/json',
+        'X-Places-Api-Version': FSQ_API_VERSION
+      }
+    });
+    const response = await fsqAutocompleteClient.get('/autocomplete', { params: req.query });
     res.json(response.data);
   } catch (error) {
     if (error.response) {

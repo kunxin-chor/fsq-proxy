@@ -31,7 +31,7 @@ async function handleSearch(e) {
     searchBtn.textContent = 'Searching...';
     
     try {
-        const response = await fetch(`${API_BASE_URL}/api/places/search?${params.toString()}`);
+        const response = await fetch(`${API_BASE_URL}/places/search?${params.toString()}`);
         const data = await response.json();
         
         if (!response.ok) {
