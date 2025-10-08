@@ -1,0 +1,46 @@
+### Foursquare Places API Proxy - Example Requests
+### Use with REST Client extension in VS Code or similar tools
+
+@baseUrl = http://localhost:3000
+
+### Health Check
+GET {{baseUrl}}/health
+
+### Root - Get API Info
+GET {{baseUrl}}/
+
+### 1. Search for coffee shops in New York City
+GET {{baseUrl}}/api/places/search?ll=40.7128,-74.0060&query=coffee&limit=10
+
+### 2. Search for restaurants near Times Square with filters
+GET {{baseUrl}}/api/places/search?ll=40.7580,-73.9855&query=restaurant&limit=20&open_now=true&sort=RATING
+
+### 3. Search using "near" parameter
+GET {{baseUrl}}/api/places/search?near=San Francisco, CA&query=pizza&limit=15
+
+### 4. Search with category filter (13065 = Coffee Shop)
+GET {{baseUrl}}/api/places/search?ll=34.0522,-118.2437&categories=13065&limit=10
+
+### 5. Search with price range
+GET {{baseUrl}}/api/places/search?ll=40.7128,-74.0060&query=restaurant&min_price=3&max_price=4&limit=10
+
+### 6. Nearby search - Get places near a location
+GET {{baseUrl}}/api/places/nearby?ll=40.7128,-74.0060&limit=20&radius=500
+
+### 7. Get place details (replace with actual fsq_id)
+GET {{baseUrl}}/api/places/4b0588f0f964a520f4a522e3
+
+### 8. Get place details with specific fields
+GET {{baseUrl}}/api/places/4b0588f0f964a520f4a522e3?fields=name,location,rating,hours,price,website
+
+### 9. Get place photos
+GET {{baseUrl}}/api/places/4b0588f0f964a520f4a522e3/photos?limit=10
+
+### 10. Get place tips
+GET {{baseUrl}}/api/places/4b0588f0f964a520f4a522e3/tips?limit=10&sort=POPULAR
+
+### 11. Autocomplete search
+GET {{baseUrl}}/api/autocomplete?query=starbucks&ll=40.7128,-74.0060&limit=5
+
+### 12. Autocomplete with location bias
+GET {{baseUrl}}/api/autocomplete?query=central park&ll=40.7829,-73.9654&limit=10

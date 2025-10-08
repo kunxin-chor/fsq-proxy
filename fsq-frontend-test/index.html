@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foursquare Places API Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .search-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .results-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .results-header h2 {
+            color: #333;
+            font-size: 1.5rem;
+        }
+
+        .results-count {
+            background: #667eea;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .place-item {
+            padding: 20px;
+            border: 2px solid #f0f0f0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .place-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+
+        .place-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .place-category {
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .place-address {
+            color: #666;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .place-distance {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            border: 2px solid #fcc;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .api-info {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .api-info code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗺️ Foursquare Places Search</h1>
+            <p>Test the Place Search API with location and query parameters</p>
+        </div>
+
+        <div class="search-card">
+            <div class="api-info">
+                <strong>API Endpoint:</strong> <code id="api-endpoint">http://localhost:3000/api/places/search</code>
+            </div>
+
+            <form id="searchForm">
+                <h3 style="margin-bottom: 15px; color: #333;">Location Parameters</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ll">ll (latitude,longitude)</label>
+                        <input type="text" id="ll" name="ll" placeholder="e.g., 40.7128,-74.0060">
+                    </div>
+                    <div class="form-group">
+                        <label for="near">near (geocodable locality)</label>
+                        <input type="text" id="near" name="near" placeholder="e.g., New York, NY">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ne">ne (north/east corner)</label>
+                        <input type="text" id="ne" name="ne" placeholder="e.g., 40.8,-73.9">
+                    </div>
+                    <div class="form-group">
+                        <label for="sw">sw (south/west corner)</label>
+                        <input type="text" id="sw" name="sw" placeholder="e.g., 40.7,-74.0">
+                    </div>
+                </div>
+
+                <h3 style="margin: 20px 0 15px; color: #333;">Search Parameters</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="query">query</label>
+                        <input type="text" id="query" name="query" placeholder="e.g., coffee, pizza">
+                    </div>
+                    <div class="form-group">
+                        <label for="fsq_category_ids">fsq_category_ids</label>
+                        <input type="text" id="fsq_category_ids" name="fsq_category_ids" placeholder="e.g., 13065">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fsq_chain_ids">fsq_chain_ids</label>
+                        <input type="text" id="fsq_chain_ids" name="fsq_chain_ids" placeholder="Chain IDs">
+                    </div>
+                    <div class="form-group">
+                        <label for="exclude_fsq_chain_ids">exclude_fsq_chain_ids</label>
+                        <input type="text" id="exclude_fsq_chain_ids" name="exclude_fsq_chain_ids" placeholder="Chain IDs to exclude">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="exclude_all_chains">exclude_all_chains</label>
+                        <select id="exclude_all_chains" name="exclude_all_chains">
+                            <option value="">-- Not set --</option>
+                            <option value="true">true</option>
+                            <option value="false">false</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="fields">fields</label>
+                        <input type="text" id="fields" name="fields" placeholder="e.g., name,location,rating">
+                    </div>
+                </div>
+
+                <h3 style="margin: 20px 0 15px; color: #333;">Filter Parameters</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="limit">limit (1-50)</label>
+                        <input type="number" id="limit" name="limit" placeholder="e.g., 10">
+                    </div>
+                    <div class="form-group">
+                        <label for="radius">radius (0-100000 meters)</label>
+                        <input type="number" id="radius" name="radius" placeholder="e.g., 1000">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="sort">sort</label>
+                        <select id="sort" name="sort">
+                            <option value="">-- Not set --</option>
+                            <option value="RELEVANCE">RELEVANCE</option>
+                            <option value="RATING">RATING</option>
+                            <option value="DISTANCE">DISTANCE</option>
+                            <option value="POPULARITY">POPULARITY</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="open_now">open_now</label>
+                        <select id="open_now" name="open_now">
+                            <option value="">-- Not set --</option>
+                            <option value="true">true</option>
+                            <option value="false">false</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="open_at">open_at (DOWTHHMM)</label>
+                        <input type="text" id="open_at" name="open_at" placeholder="e.g., 1T2130">
+                    </div>
+                    <div class="form-group">
+                        <label for="tel_format">tel_format</label>
+                        <select id="tel_format" name="tel_format">
+                            <option value="">-- Not set --</option>
+                            <option value="NATIONAL">NATIONAL</option>
+                            <option value="E164">E164</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="min_price">min_price (1-4)</label>
+                        <input type="number" id="min_price" name="min_price" placeholder="1-4">
+                    </div>
+                    <div class="form-group">
+                        <label for="max_price">max_price (1-4)</label>
+                        <input type="number" id="max_price" name="max_price" placeholder="1-4">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn" id="searchBtn">
+                    Search Places
+                </button>
+            </form>
+        </div>
+
+        <div id="resultsContainer" style="display: none;">
+            <div class="results-card">
+                <div class="results-header">
+                    <h2>Search Results</h2>
+                    <span class="results-count" id="resultsCount">0 places</span>
+                </div>
+                <div id="results"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
