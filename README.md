@@ -18,7 +18,52 @@ windsurf-project-2/
 └── README.md               # This file
 ```
 
-## Setup for GitHub Codespaces
+## Quick Start with Setup Scripts
+
+### Automated Setup (Recommended)
+
+**For GitHub Codespaces or Linux/Mac:**
+
+```bash
+# Make scripts executable
+chmod +x setup.sh run.sh
+
+# Run setup (installs dependencies and configures .env)
+./setup.sh
+
+# Run the server (auto-configures Codespaces ports)
+./run.sh
+```
+
+The `setup.sh` script will:
+- Prompt for your Foursquare Service Key
+- Ask for port number (default: 3000)
+- Create the `.env` file
+- Install npm dependencies
+- Install nodemon globally
+
+The `run.sh` script will:
+- Detect if running in Codespaces
+- Auto-configure port 3000 to public (in Codespaces)
+- Display the forwarded URL
+- Start the server with nodemon
+
+**For Windows PowerShell:**
+
+```powershell
+# Manual setup required (or use WSL/Git Bash to run .sh scripts)
+cd fsq-proxy-api
+npm install
+npm install -g nodemon
+
+# Edit .env file manually
+# Then run:
+npm run dev
+```
+
+---
+
+## Manual Setup for GitHub Codespaces
 
 ### 1. Create Codespace
 
